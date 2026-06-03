@@ -1,4 +1,4 @@
 from .cleaning import DataCleaner
+from .transformations import DataTransformer
 
-# Esto define qué se expone al hacer "from core.preprocessing import *"
-__all__ = ["DataCleaner"]
+__all__ = ["DataCleaner", "DataTransformer"]
