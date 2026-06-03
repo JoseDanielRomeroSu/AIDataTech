@@ -1,12 +1,15 @@
 import pandas as pd
 import numpy as np
 from typing import Union, List, Optional
+# Importamos el imputer avanzado de scikit-learn
+from sklearn.experimental import enable_iterative_imputer  # Obligatorio para habilitarlo
+from sklearn.impute import IterativeImputer
 
 
 class DataCleaner:
     """
     Clase modular encargada de las tareas quirúrgicas de calidad y limpieza de datos:
-    Tratamiento de nulos, detección/filtrado de outliers y formateo básico.
+    Tratamiento de nulos (básico y avanzado), detección/filtrado de outliers y formateo.
     """
 
     def __init__(self):
@@ -17,7 +20,8 @@ class DataCleaner:
         df: pd.DataFrame, 
         columnas: Union[str, List[str]], 
         estrategia: str = "media", 
-        valor_fijo: Optional[any] = None
+        valor_fijo: Optional[any] = None,
+        random_state: int = 42
     ) -> pd.DataFrame:
         """
         Trata los valores faltantes (NaN) en las columnas especificadas.
@@ -28,6 +32,7 @@ class DataCleaner:
         - 'mediana': Imputa usando la mediana (solo numéricas).
         - 'moda': Imputa usando el valor más frecuente.
         - 'fijo': Imputa usando el parámetro 'valor_fijo'.
+        - 'mice': Imputación avanzada multivariante (IterativeImputer) basada en Machine Learning.
         """
         df_clean = df.copy()
         
@@ -35,10 +40,23 @@ class DataCleaner:
         if isinstance(columnas, str):
             columnas = [columnas]
             
+        # Validar que todas las columnas existan
         for col in columnas:
             if col not in df_clean.columns:
                 raise ValueError(f"La columna '{col}' no existe en el DataFrame.")
-                
+
+        # --- ESTRATEGIA AVANZADA: MICE ---
+        if estrategia == "mice":
+            # IterativeImputer requiere trabajar sobre variables numéricas
+            # Seleccionamos el subset y aplicamos el modelo estimador
+            imputer = IterativeImputer(random_state=random_state, max_iter=10)
+            
+            # Ajustamos y transformamos solo las columnas seleccionadas
+            df_clean[columnas] = imputer.fit_transform(df_clean[columnas])
+            return df_clean
+
+        # --- ESTRATEGIAS TRADICIONALES ---
+        for col in columnas:
             if estrategia == "eliminar":
                 df_clean = df_clean.dropna(subset=[col])
             elif estrategia == "media":
@@ -76,7 +94,6 @@ class DataCleaner:
         limite_inferior = q1 - (factor * iqr)
         limite_superior = q3 + (factor * iqr)
         
-        # Filtro booleano: True si está fuera de los límites
         return (df[columna] < limite_inferior) | (df[columna] > limite_superior)
 
     def gestionar_outliers(
