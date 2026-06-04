@@ -7,7 +7,7 @@ Este repositorio contiene una herramienta modular empaquetada en Python diseñad
 ## 📂 Arquitectura del Repositorio
 
 ```text
-nombre-del-proyecto/
+AIDataTech/
 ├── core/                       # LA HERRAMIENTA REUTILIZABLE (Código fuente)
 │   ├── preprocessing/          # Módulos de Calidad y Transformación
 │   │   ├── cleaning.py         # Tratamiento quirúrgico de nulos (MICE) y outliers (IQR)
