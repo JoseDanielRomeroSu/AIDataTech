@@ -58,21 +58,33 @@ class TreeRegressionSuite:
     basados en Árboles de Decisión, Random Forest y XGBoost.
     """
 
-    def __init__(self, tipo_modelo: str = "random_forest", hyperparametros: Dict[str, Any] = None):
+    def __init__(self, model_instance: Any):
         """
-        Modelos disponibles: 'decision_tree', 'random_forest', 'xgboost'.
+        El constructor ahora recibe directamente la instancia del modelo ya configurada.
+        Se oculta el uso directo de este __init__ a favor de los métodos de clase.
         """
+        self.model = model_instance
+
+    # --- MÉTODOS DE CLASE (Constructores Alternativos) ---
+
+    @classmethod
+    def decision_tree(cls, hyperparametros: Dict[str, Any] = None):
+        """Inicializa la suite con un DecisionTreeRegressor."""
         params = hyperparametros if hyperparametros else {}
-        self.tipo_modelo = tipo_modelo.lower()
-        
-        if self.tipo_modelo == "decision_tree":
-            self.model = DecisionTreeRegressor(**params)
-        elif self.tipo_modelo == "random_forest":
-            self.model = RandomForestRegressor(**params)
-        elif self.tipo_modelo == "xgboost":
-            self.model = xgb.XGBRegressor(**params)
-        else:
-            raise ValueError(f"Modelo '{tipo_modelo}' no soportado. Elige 'decision_tree', 'random_forest' o 'xgboost'.")
+        return cls(DecisionTreeRegressor(**params))
+
+    @classmethod
+    def random_forest(cls, hyperparametros: Dict[str, Any] = None):
+        """Inicializa la suite con un RandomForestRegressor."""
+        params = hyperparametros if hyperparametros else {}
+        return cls(RandomForestRegressor(**params))
+
+    @classmethod
+    def xgboost(cls, hyperparametros: Dict[str, Any] = None):
+        """Inicializa la suite con un XGBRegressor."""
+        params = hyperparametros if hyperparametros else {}
+        return cls(xgb.XGBRegressor(**params))
+    
 
     def _evaluar_modelo(self, y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
         mse = mean_squared_error(y_true, y_pred)
